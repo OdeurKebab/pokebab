@@ -3,10 +3,11 @@ import cv2
 import numpy as np
 from sklearn.svm import SVC
 import pickle
+import matplotlib.pyplot as plt
 
 PATH = os.path.join(os.getcwd(), 'pokemondb')
-MAX_SIZE = 475
-SIZE = 16
+MAX_SIZE = 485
+SIZE = 64
 POKEDEX = np.loadtxt(os.path.join(os.getcwd(), 'pokedex.csv'), delimiter=',', dtype=str)
 POKEDEX = dict([(int(k), v) for k, v in POKEDEX])
 
@@ -19,12 +20,14 @@ def import_model(pkl_filename):
 
 
 def file_to_img(f):
-    img = cv2.imread(os.path.join(PATH, f))
-    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.imread(os.path.join(PATH, f), 0)
+    img = cv2.copyMakeBorder(img, 5, 5, 5, 5, cv2.BORDER_CONSTANT)
+    _, mask = cv2.threshold(img, thresh=20, maxval=255, type=cv2.THRESH_BINARY)
+    return mask
 
 
 def make_img_squared(img):
-    resized = np.zeros((MAX_SIZE, MAX_SIZE), dtype='uint8')
+    resized = np.ones((MAX_SIZE, MAX_SIZE), dtype='uint8')*255
     w, h = img.shape
     h_stride = (MAX_SIZE - w) // 2
     v_stride = (MAX_SIZE - h) // 2
@@ -41,13 +44,13 @@ def load_img(f):
 
 def load_data():
     return dict(
-        [(int(f[:-4]), load_img(f)) for f in os.listdir(PATH)])
+        [(int(f[:-4]), load_img(f)) for f in os.listdir(PATH) if 'png' in f])
 
 
 def data_augmentation(im):
     copies = []
     im.shape = (SIZE, SIZE)
-    for scale in 0.5, 1:
+    for scale in 0.5, 0.75, 1:
         copy = np.zeros((int(scale * MAX_SIZE), int(scale * MAX_SIZE)), dtype='uint8')
         copy = cv2.resize(src=im.astype('uint8'), dst=None, dsize=copy.shape)
         copies.append(make_img_squared(copy).ravel())
@@ -65,7 +68,7 @@ if __name__ == '__main__':
 
     del data
 
-    model = SVC().fit(imgs, ids)
+    model = SVC(verbose=True).fit(imgs, ids)
 
     svm_pkl_filename = 'svm.pkl'
     svm_pkl = open(svm_pkl_filename, 'wb')
