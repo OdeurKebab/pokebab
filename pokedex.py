@@ -6,7 +6,7 @@ import pickle
 
 PATH = os.path.join(os.getcwd(), 'pokemondb')
 MAX_SIZE = 475
-SIZE = 128
+SIZE = 16
 POKEDEX = np.loadtxt(os.path.join(os.getcwd(), 'pokedex.csv'), delimiter=',', dtype=str)
 POKEDEX = dict([(int(k), v) for k, v in POKEDEX])
 
