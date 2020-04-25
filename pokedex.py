@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 PATH = os.path.join(os.getcwd(), 'pokemondb')
 MAX_SIZE = 485
-SIZE = 64
+SIZE = 32
 POKEDEX = np.loadtxt(os.path.join(os.getcwd(), 'pokedex.csv'), delimiter=',', dtype=str)
 POKEDEX = dict([(int(k), v) for k, v in POKEDEX])
 
